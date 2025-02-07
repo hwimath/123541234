@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>등비중항, 등비수열의 합</title>
+  <title>등비수열의 합 (퀴즈 게임)</title>
   <!-- MathJax 로드 (LaTeX 수식 렌더링용) -->
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
   <style>
@@ -89,6 +89,9 @@
   <div id="questionContainer" class="question-container">
     <div id="questionText"></div>
     <div id="choicesContainer"></div>
+    <!-- 피드백 메시지와 다음문제 버튼 -->
+    <div id="feedback" style="margin-top:10px; font-weight:bold;"></div>
+    <button id="nextButton" class="btn hidden" onclick="nextQuestion()">다음문제</button>
   </div>
 </div>
 
@@ -101,10 +104,12 @@
 </div>
 
 <script>
-// 문제 목록 (번호 없이, 무작위 출제를 위해 배열에 저장)
+// ★ 수정된 문제 목록 ★
+// 원래 문제 중 조건이 복잡하거나 계산 부담이 큰 문제(예: #10, #11, #13, #14, #15)는 삭제하고,
+// 나머지 문제(문제 1~9, 22~39)를 사용합니다.
 const questionBank = [
+  // [문제 1 ~ 9: 등비중항 관련 문제]
   {
-    // #1
     question: "다음 세 수 \\(2,\\; x,\\; 8\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "\\(x = 2\\)",
@@ -115,7 +120,6 @@ const questionBank = [
     correct: 3
   },
   {
-    // #2
     question: "다음 세 수 \\(2,\\; 6,\\; x\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "\\(x = 9\\)",
@@ -126,7 +130,6 @@ const questionBank = [
     correct: 2
   },
   {
-    // #3
     question: "다음 세 수 \\(x,\\; x^2 - 2,\\; x^3\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "\\(x = 1\\)",
@@ -137,7 +140,6 @@ const questionBank = [
     correct: 3
   },
   {
-    // #4
     question: "다음 세 수 \\(x-2,\\; x+1,\\; x-5\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "x = 1",
@@ -148,7 +150,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #5
     question: "다음 세 수 \\(x-2,\\; x,\\; 2x+3\\) \\((x>0)\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "x = 1",
@@ -159,7 +160,6 @@ const questionBank = [
     correct: 2
   },
   {
-    // #6
     question: "다음 세 수 \\(x+1,\\; 2x,\\; 4x-3\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "x = 1",
@@ -170,7 +170,6 @@ const questionBank = [
     correct: 2
   },
   {
-    // #7
     question: "다음 세 수 \\(x-2,\\; x+2,\\; x+7\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "x = 5",
@@ -181,7 +180,6 @@ const questionBank = [
     correct: 2
   },
   {
-    // #8
     question: "다음 세 수 \\(x,\\; x+1,\\; 4\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "x = 1",
@@ -192,7 +190,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #9
     question: "다음 세 수 \\(3x,\\; x-1,\\; \\dfrac{x}{12}\\) \\((x>1)\\)가 이 순서대로 등비수열을 이룰 때, \\(x\\)의 값을 구하시오.",
     choices: [
       "x = 2",
@@ -202,74 +199,18 @@ const questionBank = [
     ],
     correct: 0
   },
+  // [문제 22 ~ 39: 등비수열의 합 관련 문제]
   {
-    // #10
-    question: "(조건) 서로 다른 세 수 \\(4,\\; a,\\; b\\)가 이 순서로 등차수열이고, 세 수 \\(a,\\; b,\\; 4\\)가 이 순서로 등비수열을 이룬다. 이때 \\(a, b\\)의 값을 구하시오.",
-    choices: [
-      "(a,b) = (1, -2)",
-      "(a,b) = (2, 0)",
-      "(a,b) = (4, -4)",
-      "(a,b) = (-1, 2)"
-    ],
-    correct: 0
-  },
-  {
-    // #11
-    question: "(조건) 세 수 \\(a,\\; b,\\; 24\\)가 이 순서로 등차수열을 이루고, \\(4,\\; a,\\; b\\)가 이 순서로 등비수열이며 \\(a>0, b>0\\)일 때, \\(a, b\\)의 값을 구하시오.",
-    choices: [
-      "(1, 2)",
-      "(8, 16)",
-      "(4, 24)",
-      "(6, 12)"
-    ],
-    correct: 1
-  },
-  {
-    // #13
-    question: "(조건) 2와 12 사이에 양수 \\(a, b\\)를 넣어 \\(2,\\; a,\\; b\\)가 이 순서로 등비수열을 이루고, \\(a,\\; b,\\; 12\\)가 이 순서로 등차수열일 때 \\(a,b\\)를 구하시오. (\\(0<2<a<b<12\\))",
-    choices: [
-      "(3, 6)",
-      "(4, 8)",
-      "(6, 10)",
-      "(2, 12)"
-    ],
-    correct: 1
-  },
-  {
-    // #14
-    question: "(조건) 서로 다른 두 양수 \\(a,b\\)에 대하여 \\((a-4),\\; a,\\; b\\)가 등차수열, \\(a,\\; b,\\; 16a\\)가 등비수열을 이룰 때, \\(a,b\\)를 구하시오.",
-    choices: [
-      "(4/3, 16/3)",
-      "(1, 5)",
-      "(2, 6)",
-      "해가 없다"
-    ],
-    correct: 0
-  },
-  {
-    // #15
-    question: "(조건) 서로 다른 두 양수 \\(a,b\\)에 대하여 \\(a,\\; b,\\; 9\\)가 등차수열, \\(a,\\; b,\\; 4a\\)가 등비수열을 이룰 때, \\(a,b\\)를 구하시오.",
-    choices: [
-      "(3,6)",
-      "(2,4)",
-      "(1,8)",
-      "해가 없다"
-    ],
-    correct: 0
-  },
-  {
-    // #22
     question: "첫째항 \\(a=2\\), 공비 \\(r=\\dfrac13\\)인 등비수열에서 \\(S_{10}\\) (첫째항부터 제10항까지의 합)을 구하시오.",
     choices: [
       "\\(3\\bigl(1 - (\\tfrac13)^{10}\\bigr)\\)",
-      "\\(\\dfrac{3}{1 - (\\tfrac13)^{10}}\\)",
-      "\\(2\\Bigl(\\dfrac{1 - (\\tfrac13)^{10}}{1 - (\\tfrac13)}\\Bigr)\\)",
-      "\\(\\dfrac{177144}{59049}\\)"
+      "\\(2\\bigl(1 - (\\tfrac13)^{10}\\bigr)\\)",
+      "\\(3\\bigl(1 + (\\tfrac13)^{10}\\bigr)\\)",
+      "\\(2\\bigl(1 + (\\tfrac13)^{10}\\bigr)\\)"
     ],
-    correct: 0 // 같은 값이 0번과 3번이지만 일단 0으로 처리
+    correct: 0
   },
   {
-    // #23
     question: "첫째항 \\(a=-3\\), 공비 \\(r=-2\\)인 등비수열에서 첫째항부터 제10항까지의 합 \\(S_{10}\\)을 구하시오.",
     choices: [
       "1023", "-1023", "1024", "-1024"
@@ -277,7 +218,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #24
     question: "다음 급수 \\(1 + \\dfrac12 + \\bigl(\\dfrac12\\bigr)^2 + \\cdots + \\bigl(\\dfrac12\\bigr)^9\\)의 합을 구하시오. (등비수열의 합)",
     choices: [
       "\\(\\dfrac{1023}{512}\\)",
@@ -288,7 +228,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #25
     question: "다음 등비수열 부분합 \\(2 + 2^3 + 2^5 + 2^7 + 2^9\\)의 값을 구하시오.",
     choices: [
       "170", "342", "682", "1024"
@@ -296,7 +235,6 @@ const questionBank = [
     correct: 2
   },
   {
-    // #26
     question: "다음 급수 \\(4 + (-2) + 1 + \\bigl(-\\dfrac12\\bigr) + \\cdots + \\bigl(-\\dfrac{1}{128}\\bigr)\\)의 합을 구하시오. (등비수열)",
     choices: [
       "\\(\\dfrac{341}{128}\\)",
@@ -307,7 +245,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #27
     question: "등비수열 \\(\\{a_n\\} = 1, 2, 4, 8, \\dots\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(2^n - 1\\)",
@@ -318,7 +255,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #28
     question: "등비수열 \\(\\{a_n\\} = 4, 4, 4, 4, \\dots\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(4n\\)",
@@ -329,7 +265,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #29
     question: "등비수열 \\(\\{a_n\\} = 1, \\dfrac13, \\dfrac19, \\dfrac1{27}, \\dots\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(\\dfrac32\\Bigl(1 - (\\tfrac13)^n\\Bigr)\\)",
@@ -340,7 +275,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #30
     question: "등비수열 \\(\\{a_n\\} = 2, 8, 32, 128, \\dots\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(2\\dfrac{4^n - 1}{3}\\)",
@@ -351,18 +285,16 @@ const questionBank = [
     correct: 0
   },
   {
-    // #31
     question: "등비수열 \\(\\{-27, -9, -3, -1, \\dots\\}\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(-\\dfrac{81}{2}\\Bigl[1 - (\\tfrac13)^n\\Bigr]\\)",
-      "\\(\\dfrac{81}{2}\\Bigl[1 - (\\tfrac13)^n\\Bigr]\\)",
+      "\\(-\\dfrac{81}{2}\\Bigl[1 + (\\tfrac13)^n\\Bigr]\\)",
       "\\(-27\\cdot\\bigl(-\\dfrac13\\bigr)^n\\)",
-      "\\(-\\dfrac{81}{2}\\Bigl[1 + (\\tfrac13)^n\\Bigr]\\)"
+      "\\(\\dfrac{81}{2}\\Bigl[1 - (\\tfrac13)^n\\Bigr]\\)"
     ],
     correct: 0
   },
   {
-    // #32
     question: "등비수열 \\(\\bigl\\{\\dfrac32, 1, \\dfrac23, \\dfrac49, \\dots\\bigr\\}\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(\\dfrac32\\cdot\\dfrac{1 - (\\tfrac23)^n}{1 - (\\tfrac23)}\\)",
@@ -373,7 +305,6 @@ const questionBank = [
     correct: 1
   },
   {
-    // #33
     question: "등비수열 \\(\\{2, -6, 18, -54, \\dots\\}\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(\\dfrac{1 - (-3)^n}{2}\\)",
@@ -384,7 +315,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #34
     question: "등비수열 \\(\\bigl\\{\\dfrac12, \\dfrac14, \\dfrac18, \\dfrac1{16}, \\dots\\bigr\\}\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(1 - (\\tfrac12)^n\\)",
@@ -395,7 +325,6 @@ const questionBank = [
     correct: 0
   },
   {
-    // #35
     question: "등비수열 \\(\\bigl\\{\\dfrac{2}{27}, \\dfrac{2}{9}, \\dfrac{2}{3}, 2, \\dots\\bigr\\}\\)에서 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(\\dfrac{2}{27}\\cdot\\dfrac{1 - 3^n}{1 - 3}\\)",
@@ -403,10 +332,9 @@ const questionBank = [
       "\\(\\dfrac{2}{27}\\cdot\\dfrac{3^n - 1}{2}\\)",
       "\\(\\dfrac{3^n - 1}{27}\\)"
     ],
-    correct: 3 // 여러 표현이 같지만 3번을 정답 처리
+    correct: 3
   },
   {
-    // #36
     question: "등비수열 \\(\\{a_n\\}\\)의 일반항이 \\(a_n = \\dfrac{1}{3^n}\\)일 때, 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(\\dfrac{1}{3^n}\\)",
@@ -417,7 +345,6 @@ const questionBank = [
     correct: 1
   },
   {
-    // #37
     question: "등비수열 \\(\\{a_n\\}\\)의 일반항이 \\(a_n = 2^{2n-1}\\)일 때, 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
       "\\(2\\dfrac{4^n - 1}{3}\\)",
@@ -428,23 +355,21 @@ const questionBank = [
     correct: 0
   },
   {
-    // #38
     question: "등비수열 \\(\\{a_n\\}\\)의 일반항이 \\(a_n = 5\\cdot 2^{n-2}\\)일 때, 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
-      "\\(\\dfrac{5}{2}\\dfrac{2^n -1}{-1}\\)",
-      "\\(\\dfrac{5}{2}\\bigl[2^n +1\\bigr]\\)",
-      "\\(\\dfrac{5}{2}\\bigl[2^n -1\\bigr]\\)",
-      "\\(5\\bigl[2^n -1\\bigr]\\)"
+      "\\(\\frac{5}{2}(2^n - 1)\\)",
+      "\\(\\frac{5}{2}(2^n + 1)\\)",
+      "\\(5(2^n - 1)\\)",
+      "\\(\\frac{5}{4}(2^n - 1)\\)"
     ],
-    correct: 2
+    correct: 0
   },
   {
-    // #39
     question: "등비수열 \\(\\{a_n\\}\\)의 일반항이 \\(a_n = 2\\cdot 3^{n-1}\\)일 때, 첫째항부터 제\\(n\\)항까지의 합 \\(S_n\\)을 구하시오.",
     choices: [
-      "\\(3^n -1\\)",
-      "\\(2\\dfrac{3^n -1}{2}\\)",
-      "\\(3^n +1\\)",
+      "\\(3^n - 1\\)",
+      "\\(2\\dfrac{3^n - 1}{2}\\)",
+      "\\(3^n + 1\\)",
       "\\(3^n\\)"
     ],
     correct: 0
@@ -452,15 +377,18 @@ const questionBank = [
 ];
 
 // 전역 상태 변수
-let shuffledQuestions = [];   // 문제 섞은 후 담을 배열
+let shuffledQuestions = [];   // 섞인 문제 배열
 let currentQuestionIndex = 0; // 현재 문제 인덱스
 let score = 0;                // 현재 점수
 let lives = 3;                // 남은 기회
-let timer = null;             // per-question 에너지 타이머
-let energyTimeLimit = 0;      // 난이도별 제한(초)
-let infiniteMode = false;     // 모든 문제 소진 후 무한반복 여부
+let timer = null;             // per-문항 에너지 타이머
+let energyTimeLimit = 0;      // 난이도별 시간 제한(초)
+let infiniteMode = false;     // 문제 소진 후 무한 반복 여부
 let totalElapsed = 0;         // 게임 전체 경과 시간(초)
-let totalTimer = null;        // 게임 전체 경과시간 측정용
+let totalTimer = null;        // 전체 경과 시간 측정용
+let selectedDifficulty = null;
+let playerName = "";
+let questionAnswered = false; // 해당 문제에 답변했는지 여부
 
 // 난이도별 점수
 const difficultyPoints = {
@@ -470,24 +398,20 @@ const difficultyPoints = {
   easy: 10
 };
 
-let selectedDifficulty = null;
-let playerName = "";
-
-// ---------- 유틸: 배열 무작위 섞기 ----------
+// 배열 무작위 섞기
 function shuffleArray(array) {
-  for(let i = array.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random()* (i+1));
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 }
 
-// --------------------------------------------
 // 초기 화면(이름 입력)
 function startGame(){
   const input = document.getElementById("playerNameInput");
   playerName = input.value.trim();
-  if(!playerName){
+  if (!playerName) {
     alert("이름을 입력하세요!");
     return;
   }
@@ -496,20 +420,19 @@ function startGame(){
 }
 
 // 난이도 선택
-function selectDifficulty(diff){
+function selectDifficulty(diff) {
   selectedDifficulty = diff;
-  if(diff === "hardest") {
+  if (diff === "hardest") {
     energyTimeLimit = 20;
-  } else if(diff === "hard") {
+  } else if (diff === "hard") {
     energyTimeLimit = 30;
-  } else if(diff === "medium") {
+  } else if (diff === "medium") {
     energyTimeLimit = 40;
   } else {
-    energyTimeLimit = Infinity; // 하(제한없음)
+    energyTimeLimit = Infinity; // 시간 제한 없음
   }
   // 초기화
   score = 0; lives = 3; totalElapsed = 0;
-  // 문제 셔플
   shuffledQuestions = shuffleArray([...questionBank]);
   currentQuestionIndex = 0;
   infiniteMode = false;
@@ -520,7 +443,7 @@ function selectDifficulty(diff){
   
   // 전체 시간 타이머 시작
   clearInterval(totalTimer);
-  totalTimer = setInterval(()=>{
+  totalTimer = setInterval(() => {
     totalElapsed++;
     document.getElementById("elapsedTimeDisplay").textContent = totalElapsed;
   }, 1000);
@@ -530,96 +453,89 @@ function selectDifficulty(diff){
 }
 
 // UI 갱신 (점수, 기회 등)
-function updateStatusUI(){
+function updateStatusUI() {
   document.getElementById("scoreDisplay").textContent = score;
   document.getElementById("livesDisplay").textContent = lives;
 }
 
 // 문제 표시
-function showQuestion(){
-  if(lives <= 0){
+function showQuestion() {
+  questionAnswered = false;
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("nextButton").style.display = "none";
+  
+  if (lives <= 0) {
     endGame();
     return;
   }
-  if(currentQuestionIndex >= shuffledQuestions.length){
-    // 모든 문제 다 풀었으면 => 무한 반복 모드로 전환
+  if (currentQuestionIndex >= shuffledQuestions.length) {
+    // 모든 문제를 다 풀었으면 무한반복 모드
     infiniteMode = true;
   }
   
   let qObj = null;
-  if(!infiniteMode){
+  if (!infiniteMode) {
     qObj = shuffledQuestions[currentQuestionIndex];
   } else {
-    // 무한모드: 아무거나 랜덤 선택
-    const randIndex = Math.floor(Math.random()* questionBank.length);
+    const randIndex = Math.floor(Math.random() * questionBank.length);
     qObj = questionBank[randIndex];
   }
   
-  // 문제 표시
   document.getElementById("questionText").innerHTML = qObj.question;
-  // 보기는 섞어서 내보내도 되고, 원래 순서대로 내보내도 됨
-  // 여기서는 보기 순서도 섞어봄 (단 correct인덱스 추적 필요)
   
-  const originalChoices = qObj.choices.map((c,i)=>({text:c, index:i}));
+  // 보기 순서 섞기
+  const originalChoices = qObj.choices.map((c, i) => ({ text: c, index: i }));
   shuffleArray(originalChoices);
   
   const choicesContainer = document.getElementById("choicesContainer");
   choicesContainer.innerHTML = "";
   
-  originalChoices.forEach( (choiceObj)=>{
+  originalChoices.forEach(choiceObj => {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
     btn.innerHTML = choiceObj.text;
-    btn.onclick = ()=> checkAnswer(qObj, choiceObj.index, qObj.correct);
+    btn.onclick = () => checkAnswer(qObj, choiceObj.index, qObj.correct);
     choicesContainer.appendChild(btn);
   });
   
-  // MathJax 렌더링
   MathJax.typeset();
   
-  // 에너지바 초기화
-  if(timer) clearInterval(timer);
+  if (timer) clearInterval(timer);
   fillEnergyBar(energyTimeLimit);
 }
 
-// 정답 체크
-function checkAnswer(qObj, chosenIndex, correctIndex){
-  // 에너지바 타이머 중단
-  if(timer) clearInterval(timer);
+// 정답 체크 – 한 번 답변한 후엔 보기 버튼은 비활성화되고, 피드백 메시지와 함께 "다음문제" 버튼이 나타남
+function checkAnswer(qObj, chosenIndex, correctIndex) {
+  if (questionAnswered) return;
+  questionAnswered = true;
+  if (timer) clearInterval(timer);
   
-  if(chosenIndex === correctIndex){
-    // 정답
+  // 보기 버튼 모두 비활성화
+  const choiceButtons = document.querySelectorAll(".choice-btn");
+  choiceButtons.forEach(btn => btn.disabled = true);
+  
+  if (chosenIndex === correctIndex) {
     score += difficultyPoints[selectedDifficulty];
     updateStatusUI();
-    alert("정답입니다!\n점수가 올라갑니다.");
+    document.getElementById("feedback").innerText = "정답입니다! 점수가 올라갑니다.";
   } else {
-    // 오답
     lives--;
     updateStatusUI();
-    alert("틀렸습니다! 정답은:\n\n"
-      + qObj.choices[correctIndex] 
-      + "\n\n이었습니다.");
+    document.getElementById("feedback").innerText =
+      "틀렸습니다! 정답은 " + qObj.choices[correctIndex] + " 였습니다.";
   }
   
-  if(lives<=0){
+  if (lives <= 0) {
     endGame();
-    return;
+  } else {
+    document.getElementById("nextButton").style.display = "inline-block";
   }
-  
-  // 다음 문제로
-  if(!infiniteMode){
-    currentQuestionIndex++;
-  }
-  showQuestion();
 }
 
-// 에너지바 세팅
-function fillEnergyBar(limit){
+// 에너지바 세팅 – 시간 제한(제한이 있을 경우) 내에 답변하지 않으면 "시간초과" 처리 후 다음문제 버튼 표시
+function fillEnergyBar(limit) {
   const energyFill = document.getElementById("energyFill");
-  const energyBar = document.getElementById("energyBar");
-  
-  if(!isFinite(limit)){
-    // 제한 없음
+  if (!isFinite(limit)) {
     energyFill.style.width = "100%";
     return;
   }
@@ -627,31 +543,41 @@ function fillEnergyBar(limit){
   let remain = limit;
   energyFill.style.width = "100%";
   
-  timer = setInterval(()=>{
-    remain -= 0.2; // 0.2초 단위로 깎아본다고 가정
+  timer = setInterval(() => {
+    remain -= 0.2; // 0.2초 단위로 감소
     const ratio = Math.max(0, remain / limit);
-    energyFill.style.width = (ratio*100) + "%";
+    energyFill.style.width = (ratio * 100) + "%";
     
-    if(remain<=0){
-      // 시간 종료 => 기회 1 소모, 문제 강제 넘김
+    if (remain <= 0) {
       clearInterval(timer);
-      lives--;
-      updateStatusUI();
-      if(lives<=0){
-        endGame();
-      } else {
-        alert("시간초과! 기회가 1 줄었습니다.");
-        if(!infiniteMode){
-          currentQuestionIndex++;
+      if (!questionAnswered) {
+        questionAnswered = true;
+        lives--;
+        updateStatusUI();
+        document.getElementById("feedback").innerText = "시간초과! 기회가 1 줄었습니다.";
+        // 보기 버튼 모두 비활성화
+        const choiceButtons = document.querySelectorAll(".choice-btn");
+        choiceButtons.forEach(btn => btn.disabled = true);
+        if (lives <= 0) {
+          endGame();
+        } else {
+          document.getElementById("nextButton").style.display = "inline-block";
         }
-        showQuestion();
       }
     }
   }, 200);
 }
 
+// "다음문제" 버튼을 누르면 다음 문제로 전환
+function nextQuestion() {
+  document.getElementById("nextButton").style.display = "none";
+  document.getElementById("feedback").innerText = "";
+  if (!infiniteMode) currentQuestionIndex++;
+  showQuestion();
+}
+
 // 게임 종료 처리
-function endGame(){
+function endGame() {
   clearInterval(timer);
   clearInterval(totalTimer);
   document.getElementById("gameScreen").classList.add("hidden");
@@ -660,50 +586,49 @@ function endGame(){
 }
 
 // 점수 전송
-function sendScore(){
+function sendScore() {
   saveData("등비수열의 합", playerName, score, totalElapsed);
 }
 
-// -------------------------------------------------------------
-// 아래는 주어진 서버전송 함수 (조금 가독성을 위해 개행만 추가)
+// 서버 전송 함수 (변경 없음)
 function saveData(game, name, score, elapsedTime) {
-    const FUNCTION_URL = "https://us-central1-record-f420d.cloudfunctions.net/report";
+  const FUNCTION_URL = "https://us-central1-record-f420d.cloudfunctions.net/report";
 
-    const requestData = {
-        game,
-        name,
-        score: parseInt(score, 10),
-        elapsedTime: parseInt(elapsedTime, 10)
-    };
+  const requestData = {
+    game,
+    name,
+    score: parseInt(score, 10),
+    elapsedTime: parseInt(elapsedTime, 10)
+  };
 
-    try {
-        fetch(FUNCTION_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        })
-        .then(async response => {
-          const responseData = await response.json();
-          if (response.ok) {
-              document.getElementById('response').innerText =
-                `성공: ${JSON.stringify(responseData, null, 2)}`;
-          } else {
-              document.getElementById('response').innerText =
-                `오류: ${JSON.stringify(responseData, null, 2)}`;
-          }
-        })
-        .catch(error => {
-          console.error('요청 실패:', error);
+  try {
+    fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestData)
+    })
+      .then(async response => {
+        const responseData = await response.json();
+        if (response.ok) {
           document.getElementById('response').innerText =
-            `네트워크 오류: ${error.message}`;
-        });
-    } catch (error) {
+            `성공: ${JSON.stringify(responseData, null, 2)}`;
+        } else {
+          document.getElementById('response').innerText =
+            `오류: ${JSON.stringify(responseData, null, 2)}`;
+        }
+      })
+      .catch(error => {
         console.error('요청 실패:', error);
         document.getElementById('response').innerText =
-            `네트워크 오류: ${error.message}`;
-    }
+          `네트워크 오류: ${error.message}`;
+      });
+  } catch (error) {
+    console.error('요청 실패:', error);
+    document.getElementById('response').innerText =
+      `네트워크 오류: ${error.message}`;
+  }
 }
 </script>
 
